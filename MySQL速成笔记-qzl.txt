@@ -1,0 +1,334 @@
+Navicat--MySQL速成笔记
+author qinzhongle 2024-11-12/2024-11-15
+
+你首先需要知道的:
+(
+1.把MySQL当成一个可以用代码驱动的Excel表格
+2.连接->数据库->表->字段(列)->数据
+3.小括号()中的语句块可以在左侧行数旁收起或展开 #在图形化数据库管理工具(如Navicat)中
+4.语句要以分号结尾
+5.SQL语句不区分大小写 但是用大写更规范
+6.自己创建的库名 表名或者字段名最好加上反引号与SQL关键句区分 防止出错 #例 CREATE DATABASE `STUTEST`;
+7.添加字符型或日期型数据时要加引号
+8.ctrl+s 保存当前页的操作
+  ctrl+r 运行选中的语句块
+  ctrl+/ 将选中的语句注释
+)
+
+
+                    (一)SQL语句的种类及对应的关键词
+(
+#前面说了把MySQL当成一个可以用代码驱动的Excel表格
+#SQL语言就是用来驱动这个表格的代码
+#常见的SQL语言可以分为这几个类型
+DDL(数据定义语言 操作表结构):CREATE ALTER DROP
+DQL(数据查询语言 查询表中的数据):SELECT
+DML(数据操作语言 操作表中的数据):INSERT UPDATE DELETE
+DCL(数据控制语言 控制权限和事务):GRANT REVOKE
+)
+    
+
+                    (二)字段的类型和约束
+字段类型
+(
+#字段类型决定了该字段下能填什么类型的数据  
+#常用的字段类型                  
+整数型  INT
+小数型  DECIMAL(m,n) #m代表几位数 n代表小数点后面有几位数 如DECIMAL(2,3) 可以存放89.769这样的小数
+字符型  VARCHAR(x)   #x是字符长度 默认长度为1 
+日期型  DATE(格式:yyyy-mm-dd) TIME(格式:hh:mm:ss) DATETIME(格式:yyyy-mm-dd hh:mm:ss)
+)
+
+字段约束
+(
+#字段约束是在数据类型的基础上增加的条件 不是必须加的 视情况而定
+#常用的字段约束
+NOT NULL    非空约束(该列不能为空 默认可以为空NULL)
+DEFAULT(x)  默认约束(该列有默认值x 默认是NULL)
+UNIQUE      唯一约束(该列值必须唯一 不能重复)
+#主键和外键能起到多表之间的关联作用
+PRIMARY KEY 主键约束(该列不能为空且唯一)
+FOREIGN KEY 外键约束(设定一个字段为外键用来对应另外一个表的主键)
+#加上字段约束创建表的示例语句:
+CREATE TABLE table_name (
+字段名a 数据类型a 约束类型a, 
+字段名b 数据类型b 约束类型b, 
+...   
+  #最后一句不要加逗号
+);#右括号外要加分号
+)
+  
+                    (三)增删改查
+1.对于库
+(
+#增
+CREATE DATABASE database_name;
+#删 
+DROP DATABASE database_name;
+#改数据库名 要新建一个数据库 然后把旧数据库里的数据全导入到新数据库 没有可以直接改名的语句
+#查
+SHOW DATABASES;#列出该连接里所有的数据库
+SHOW TABLES FROM database_name;#列出该数据库里所有的表
+)
+
+2.对于表
+(
+#增加一个表(至少要添加一个字段):
+CREATE TABLE table_name (
+字段名a 数据类型a, 
+字段名b 数据类型b, 
+...   
+  #最后一句不要加逗号
+);#右括号外要加分号
+#删除这个表:
+DROP TABLE table_name; 
+#改表的名字:
+ALTER TABLE old_table_name RENAME TO new_table_name; 
+#查表的信息:
+DESCRIBE table_name;#查表的结构
+SELECT*FROM table_name;#列出整个表的数据
+)
+
+3.对于字段
+(
+#增加一个字段
+ALTER TABLE table_name ADD 字段名 字段类型 字段约束;
+ALTER TABLE table_name ADD 字段名 字段类型 字段约束 FIRST; #添加一个字段到第一位
+ALTER TABLE table_name ADD 字段名1 字段类型1 字段约束1 AFTER 字段名2; #添加一个字段到字段名2的后面
+#删除一个字段
+ALTER TABLE table_name DROP 字段名;
+#改
+ALTER TABLE table_name RENAME COLUMN 原名 TO 新名;#改字段名
+ALTER TABLE table_name CHANGE 原名 新名 字段类型;#改字段名和字段类型 后加约束条件也可以顺便把约束条件改了
+ALTER TABLE table_name MODIFY 字段名 新字段类型;#改字段类型 后接约束条件可以顺便把数据约束改了
+ALTER TABLE table_name MODIFY 字段名1 字段类型1 AFTER 字段名2; #将字段1移到字段2的后面 顺便可以把字段类型和约束条件改了
+ALTER TABLE table_name MODIFY 字段名 字段类型 FIRST;#将字段移到第一位
+#查
+SELECT 字段名 FROM table_name;
+)
+
+4.对于数据
+(
+#增
+INSERT INTO table_name VALUES(对应字段1的数据,对应字段2的数据,对应字段3的数据,...);#默认情况下 有多少个字段就要添加多少个数据 无非空约束下 可以填NULL
+INSERT INTO table_name(字段名X,字段名Y) VALUES(对应字段X的数据,对应字段Y的数据);#指定字段名进行添加
+INSERT INTO table_name VALUES(1,2,3),(a,b,c),(z,y,z);#一次添加多行数据
+#删
+DELETE FROM table_name WHERE 指定字段名 = 指定字段名下的数据; #删除指定字段名下的数据对应的那一行数据 如果有多行数据对应 将会删除多行数据
+DELETE FROM table_name; #删除表里面的全部数据
+#改
+UPDATE table_name SET 要改数据对应的字段名 = 改之后的数据 WHERE 指定字段名 = 指定字段名下的数据; #修改指定字段名下的数据对应的那一行数据 如果有多行数据对应 将会修改多行数据
+#查
+SELECT*FROM table_name;#列出整个表的数据
+SELECT 字段名 FROM table_name;#列出指定字段名下的所有数据
+SELECT DISTINCT 字段名 FROM table_name;#列出指定字段名下的所有不重复数据
+SELECT 字段名加上条件 FROM table_name; #列出一个对应字段的布尔值表 符合条件是1 不符合为0
+SELECT*FROM table_name WHERE 指定字段名 = 指定字段名下的数据;#列出指定字段名下的数据对应的那一行数据 如果有多行数据对应 将会列出多行数据
+SELECT*FROM table_name ORDER BY 字段名;         #按字段名从低到高列出全部数据
+SELECT*FROM table_name ORDER BY 字段名 DESC;    #按字段名从高到低列出全部数据
+SELECT*FROM table_name ORDER BY 字段名 LIMIT n; #按字段名从高到低列出前n行数据
+#多表联立查询
+#如果条件 表1.字段名1=表2.字段名2 将会输出这一对相等字段对应的数据
+SELECT*FROM 表1 JOIN 表2 ON 表1.字段名1=表2.字段名2; #输出相等字段对应的所有字段数据
+SELECT 字段名a,字段名b,字段名c FROM 表1 JOIN 表2 ON 表1.字段名=表2.字段名; #输出相等字段对应的部分字段数据
+#如果在JOIN前面加上LEFT 将会把JOIN左边对应的表的指定字段数据完全输出 不管条件是否成立 加上RIGHT则是右边  
+SELECT*FROM 表1 LEFT JOIN 表2 ON 表1.字段名1=表2.字段名2;
+
+WHERE 关键字后接条件表达式的运用
+(
+1.比较运算符('=' '!=' '>' '<' '>=' '<=')
+#示例
+SELECT * FROM students WHERE age = 18;
+SELECT * FROM students WHERE salary > 5000;
+2.逻辑运算符(AND OR NOT)
+#示例
+SELECT * FROM students WHERE age > 18 AND grade = 'A';
+SELECT * FROM students WHERE age < 18 OR age > 60;
+SELECT * FROM students WHERE NOT age = 18;
+3.范围(BETWEEN ... AND ...)
+#示例
+SELECT * FROM students WHERE age BETWEEN 18 AND 25;
+4.集合(IN)
+#示例
+SELECT * FROM students WHERE grade IN ('A', 'B', 'C');
+5.模式匹配(LIKE % _)
+#示例
+SELECT * FROM students WHERE name LIKE 'A%';  -- 姓名以 'A' 开头的学生
+SELECT * FROM students WHERE name LIKE '%K';  -- 姓名以 'K' 结尾的学生
+SELECT * FROM students WHERE name LIKE '_o%';  -- 姓名第二个字符是 'o'
+6.空值检查('IS NULL' 'IS NOT NULL')
+#示例
+SELECT * FROM students WHERE phone_number IS NULL;
+SELECT * FROM students WHERE address IS NOT NULL;
+7.运算查询
+#示例
+SELECT * FROM students WHERE salary * 12 > 60000;
+SELECT * FROM students WHERE length(name) > 5;
+8.时间查询
+#示例
+SELECT * FROM employees WHERE hire_date >= '2020-01-01';
+SELECT * FROM orders WHERE order_date BETWEEN '2023-01-01' AND '2023-12-31';
+9.嵌套查询(子查询)
+#示例
+SELECT * FROM students WHERE id IN (SELECT student_id FROM enrollments WHERE course_id = 101);
+SELECT`name`FROM `employee` WHERE `emp_id` IN (SELECT `manager_id` FROM `branch` WHERE `branch_name` ='研发');
+10.组合查询
+#示例
+SELECT * FROM students 
+WHERE age > 18 AND (grade = 'A' OR grade = 'B') 
+AND NOT name LIKE 'J%';
+)
+聚合函数查询
+(
+#COUNT函数 能返回字段有多少条数据
+SELECT COUNT(*) FROM 表名; #返回所有字段有多少条数据
+SELECT COUNT(字段名) FROM 表名;#返回指定字段有多少条数据
+SELECT COUNT(*) FROM 表名 WHERE `birth_date`>'1970-01-01' AND `sex`='F'; #表名后可接WHERE来附加条件
+#AVG函数 求指定字段下的数据平均数
+SELECT AVG(字段名) FROM 表名;
+#SUM函数 求指定字段下的数据总和
+SELECT SUM(字段名) FROM 表名;
+#MAX函数 求指定字段下的最大值
+SELECT MAX(字段名) FROM 表名;
+#MIN函数 求指定字段下的最小值
+SELECT MIN(字段名) FROM 表名;
+)
+联集查询
+(
+#联集查询的关键字是UNION 它可以将不同表的字段联成一个表来查询
+#要注意的是 表之间联合的字段属性要一致 字段个数也要一致
+#示例
+SELECT 字段名 FROM 表1 UNION SELECT 字段名 FROM 表2;
+SELECT 字段名a,字段名b FROM 表1 UNION SELECT 字段名c,字段名d FROM 表2;
+#查询出来的结果字段名默认是第一表中的字段名
+#不过也能将默认字段名改成别名
+SELECT 字段名a AS 别名a,字段名b AS 别名b FROM 表1 UNION SELECT 字段名c,字段名d FROM 表2;
+)
+)
+
+                    (五)轮到你了
+(
+#下面是一个多表关联的实操 结合了以上大部分语句的运用
+#我需要你在未创建表时根据语句在草稿纸上画出四个表的结构以及填好数据
+#并标出哪个字段是主键 外键对应的又是哪一个主键
+#然后根据我给出的语句创建出对应的四个表
+#最后自主完成十六道练习 相信你也能快速上手MySQL
+#需要提到的是 主键对应的字段数据不能为空且唯一
+#但是如果一个表中有多个主键 只要那几个主键对应的字段数据不是完全相同即可
+
+#多表关联实操
+#创建公司数据库表格
+#1.创建员工表格
+CREATE TABLE `employee`(
+    `emp_id` INT PRIMARY KEY,
+    `name` VARCHAR(20),
+    `birth_date` DATE,
+    `sex` VARCHAR(1),
+    `salary` INT,
+    `branch_id` INT,
+    `sup_id` INT
+);
+DESCRIBE `employee`;
+SELECT*FROM `employee`;
+
+#2.创建部门表格
+CREATE TABLE `branch`(
+    `branch_id` INT PRIMARY KEY,
+    `branch_name` VARCHAR(20),
+    `manager_id`INT,
+    FOREIGN KEY (`manager_id`) REFERENCES `employee`(`emp_id`) ON DELETE SET NULL#创建一个manager_id对应employee表中的emp_id字段外键
+                                                              #ON DELETE SET NULL意思是如果有一个`emp_id`被删掉 将会把对应的`manager_id`设为NULL
+);
+DESCRIBE `branch`;
+SELECT*FROM `branch`;
+
+#创建一个employee表中branch_id字段对应branch表中branch_id字段的外键
+ALTER TABLE `employee` ADD FOREIGN KEY(`branch_id`) REFERENCES `branch`(`branch_id`)ON DELETE SET NULL;
+#创建一个employee表中sup_id字段对应employee表中emp_id字段的外键
+ALTER TABLE `employee` ADD FOREIGN KEY(`sup_id`) REFERENCES `employee`(`emp_id`)ON DELETE SET NULL;
+
+#3.创建客户表格
+CREATE TABLE `client`(
+    `client_id` INT PRIMARY KEY,
+    `client_name` VARCHAR(20),
+    `phone` VARCHAR(20)
+);
+DESCRIBE `client`;
+SELECT*FROM `client`;
+
+#4.创建员工-客户表格
+CREATE TABLE `works_with`(
+    `emp_id` INT,
+    `client_id` INT,
+    `total_sales` INT,
+    PRIMARY KEY(`emp_id`,`client_id`),
+    FOREIGN KEY(`emp_id`) REFERENCES `employee`(`emp_id`) ON DELETE CASCADE,
+                                                         #ON DELETE CASCADE意思是如果有一个`emp_id`被删掉 将会把对应的数据都删掉
+    FOREIGN KEY(`client_id`) REFERENCES `client`(`client_id`) ON DELETE CASCADE
+);
+DESCRIBE `works_with`;
+SELECT*FROM `works_with`;
+
+#添加公司数据
+#部门表格资料
+INSERT INTO `branch` VALUES(1,'研发',NULL),(2,'行政',NULL),(3,'资讯',NULL);
+#员工表格资料
+INSERT INTO `employee` VALUES(206,'小黄','1998-10-08','F',50000,1,NULL),
+(207,'小绿','1985-09-16','M',29000,2,206),
+(208,'小黑','2000-12-19','M',35000,3,206),
+(209,'小白','1997-01-22','F',39000,3,207),
+(210,'小兰','1925-11-10','F',84000,1,207);
+
+UPDATE `branch` SET `manager_id`=206 WHERE `branch_id`=1;
+UPDATE `branch` SET `manager_id`=207 WHERE `branch_id`=2;
+UPDATE `branch` SET `manager_id`=208 WHERE `branch_id`=3;
+#客户表格资料
+INSERT INTO `client` VALUES(400,'阿狗','254354335'),
+(401,'阿猫','25633899'),
+(402,'阿来','45354345'),
+(403,'露西','54354365'),
+(404,'艾瑞克','18783783');
+#员工-客户表格资料
+INSERT INTO `works_with` VALUES(206,400,'70000'),
+(207,401,'24000'),
+(208,402,'9800'),
+(208,403,'24000'),
+(210,404,'87940');
+
+#练习
+(
+#1.查询所有员工资料
+SELECT*FROM `employee`;
+#2.查询所有客户资料
+SELECT*FROM `client`;
+#3.查询所有员工的名字
+SELECT `name` FROM `employee`;
+#4.按薪水高低查询员工资料
+SELECT*FROM `employee` ORDER BY `salary`;     #从低到高
+SELECT*FROM `employee` ORDER BY `salary` DESC;#从高到低
+#5.查询薪水前三的员工
+SELECT*FROM `employee` ORDER BY `salary` DESC LIMIT 3;
+#6.查询员工人数
+SELECT COUNT(*) FROM `employee`;
+#7.查询所有出生于1970-01-01之后的女性员工人数
+SELECT COUNT(*) FROM `employee` WHERE `birth_date`>'1970-01-01' AND `sex`='F';
+#8.查询所有员工的平均薪水
+SELECT AVG(`salary`) FROM `employee`;
+#9.查询所有员工的薪水总和
+SELECT SUM(`salary`) FROM `employee`;
+#10.查询最高薪水
+SELECT MAX(`salary`) FROM `employee`;
+#11.查询最低薪水
+SELECT MIN(`salary`) FROM `employee`;
+#12.查询电话号码尾数是335的客户
+SELECT*FROM `client` WHERE `phone` LIKE '%335';
+#13.查询姓露的客户
+SELECT*FROM `client` WHERE `client_name` LIKE '露%';
+#14.查询生日在12月的员工
+SELECT*FROM `employee` WHERE `birth_date` LIKE '_____12%';
+#15.查询所有部门的经理名字
+SELECT `emp_id`,`branch_name`,`name`FROM `employee` JOIN `branch` ON `employee`.`emp_id`=`branch`.`manager_id`;
+#16.查询研发部门的经理名字
+SELECT`name`FROM `employee` WHERE `emp_id` IN (SELECT `manager_id` FROM `branch` WHERE `branch_name` ='研发');
+)
+)
