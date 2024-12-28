@@ -1,5 +1,5 @@
 Navicat--MySQL速成笔记
-author qinzhongle 2024-11-12/2024-11-15
+author qinzhongle
 
 你首先需要知道的:
 (
