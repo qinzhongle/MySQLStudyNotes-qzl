@@ -4,7 +4,7 @@ author qinzhongle 2024-11-12/2024-11-15
 你首先需要知道的:
 (
 1.把MySQL当成一个可以用代码驱动的Excel表格
-2.连接->数据库->表->字段(列)->数据
+2.连接->数据库->表->字段(列)->数据(行)
 3.小括号()中的语句块可以在左侧行数旁收起或展开 #在图形化数据库管理工具(如Navicat)中
 4.语句要以分号结尾
 5.SQL语句不区分大小写 但是用大写更规范
@@ -50,7 +50,7 @@ UNIQUE      唯一约束(该列值必须唯一 不能重复)
 PRIMARY KEY 主键约束(该列不能为空且唯一)
 FOREIGN KEY 外键约束(设定一个字段为外键用来对应另外一个表的主键)
 #加上字段约束创建表的示例语句:
-CREATE TABLE table_name (
+CREATE TABLE 表名 (
 字段名a 数据类型a 约束类型a, 
 字段名b 数据类型b 约束类型b, 
 ...   
@@ -61,72 +61,85 @@ CREATE TABLE table_name (
                     (三)增删改查
 1.对于库
 (
-#增
+增:
 CREATE DATABASE database_name;
-#删 
+
+删: 
 DROP DATABASE database_name;
+
 #改数据库名 要新建一个数据库 然后把旧数据库里的数据全导入到新数据库 没有可以直接改名的语句
-#查
+
+查:
 SHOW DATABASES;#列出该连接里所有的数据库
 SHOW TABLES FROM database_name;#列出该数据库里所有的表
 )
 
 2.对于表
 (
-#增加一个表(至少要添加一个字段):
-CREATE TABLE table_name (
+增加一个表(至少要添加一个字段):
+CREATE TABLE 表名 (
 字段名a 数据类型a, 
 字段名b 数据类型b, 
 ...   
   #最后一句不要加逗号
 );#右括号外要加分号
-#删除这个表:
-DROP TABLE table_name; 
-#改表的名字:
-ALTER TABLE old_table_name RENAME TO new_table_name; 
-#查表的信息:
-DESCRIBE table_name;#查表的结构
-SELECT*FROM table_name;#列出整个表的数据
+
+删除这个表:
+DROP TABLE 表名; 
+
+改表的名字:
+ALTER TABLE 旧表名 RENAME TO 新表名; 
+
+查表的信息:
+DESCRIBE 表名;#查表的结构
+SELECT*FROM 表名;#列出整个表的数据
+SHOW CREATE TABLE 表名;#查看表的创建语句
 )
 
 3.对于字段
 (
-#增加一个字段
-ALTER TABLE table_name ADD 字段名 字段类型 字段约束;
-ALTER TABLE table_name ADD 字段名 字段类型 字段约束 FIRST; #添加一个字段到第一位
-ALTER TABLE table_name ADD 字段名1 字段类型1 字段约束1 AFTER 字段名2; #添加一个字段到字段名2的后面
-#删除一个字段
-ALTER TABLE table_name DROP 字段名;
-#改
-ALTER TABLE table_name RENAME COLUMN 原名 TO 新名;#改字段名
-ALTER TABLE table_name CHANGE 原名 新名 字段类型;#改字段名和字段类型 后加约束条件也可以顺便把约束条件改了
-ALTER TABLE table_name MODIFY 字段名 新字段类型;#改字段类型 后接约束条件可以顺便把数据约束改了
-ALTER TABLE table_name MODIFY 字段名1 字段类型1 AFTER 字段名2; #将字段1移到字段2的后面 顺便可以把字段类型和约束条件改了
-ALTER TABLE table_name MODIFY 字段名 字段类型 FIRST;#将字段移到第一位
-#查
-SELECT 字段名 FROM table_name;
+增加一个字段：
+ALTER TABLE 表名 ADD 字段名 字段类型 字段约束;
+ALTER TABLE 表名 ADD 字段名 字段类型 字段约束 FIRST; #添加一个字段到第一位
+ALTER TABLE 表名 ADD 字段名1 字段类型1 字段约束1 AFTER 字段名2; #添加一个字段到字段名2的后面
+
+删除一个字段：
+ALTER TABLE 表名 DROP 字段名;
+
+改:
+ALTER TABLE 表名 RENAME COLUMN 原名 TO 新名;#改字段名
+ALTER TABLE 表名 CHANGE 原名 新名 字段类型;#改字段名和字段类型 后加约束条件也可以顺便把约束条件改了
+ALTER TABLE 表名 MODIFY 字段名 新字段类型;#改字段类型 后接约束条件可以顺便把数据约束改了
+ALTER TABLE 表名 MODIFY 字段名1 字段类型1 AFTER 字段名2; #将字段1移到字段2的后面 顺便可以把字段类型和约束条件改了
+ALTER TABLE 表名 MODIFY 字段名 字段类型 FIRST;#将字段移到第一位
+
+查:
+SELECT 字段名 FROM 表名;
 )
 
 4.对于数据
 (
-#增
-INSERT INTO table_name VALUES(对应字段1的数据,对应字段2的数据,对应字段3的数据,...);#默认情况下 有多少个字段就要添加多少个数据 无非空约束下 可以填NULL
-INSERT INTO table_name(字段名X,字段名Y) VALUES(对应字段X的数据,对应字段Y的数据);#指定字段名进行添加
-INSERT INTO table_name VALUES(1,2,3),(a,b,c),(z,y,z);#一次添加多行数据
-#删
-DELETE FROM table_name WHERE 指定字段名 = 指定字段名下的数据; #删除指定字段名下的数据对应的那一行数据 如果有多行数据对应 将会删除多行数据
-DELETE FROM table_name; #删除表里面的全部数据
-#改
-UPDATE table_name SET 要改数据对应的字段名 = 改之后的数据 WHERE 指定字段名 = 指定字段名下的数据; #修改指定字段名下的数据对应的那一行数据 如果有多行数据对应 将会修改多行数据
-#查
-SELECT*FROM table_name;#列出整个表的数据
-SELECT 字段名 FROM table_name;#列出指定字段名下的所有数据
-SELECT DISTINCT 字段名 FROM table_name;#列出指定字段名下的所有不重复数据
-SELECT 字段名加上条件 FROM table_name; #列出一个对应字段的布尔值表 符合条件是1 不符合为0
-SELECT*FROM table_name WHERE 指定字段名 = 指定字段名下的数据;#列出指定字段名下的数据对应的那一行数据 如果有多行数据对应 将会列出多行数据
-SELECT*FROM table_name ORDER BY 字段名;         #按字段名从低到高列出全部数据
-SELECT*FROM table_name ORDER BY 字段名 DESC;    #按字段名从高到低列出全部数据
-SELECT*FROM table_name ORDER BY 字段名 LIMIT n; #按字段名从高到低列出前n行数据
+增:
+INSERT INTO 表名 VALUES(对应字段1的数据,对应字段2的数据,对应字段3的数据,...);#默认情况下 有多少个字段就要添加多少个数据 无非空约束下 可以填NULL
+INSERT INTO 表名(字段名X,字段名Y) VALUES(对应字段X的数据,对应字段Y的数据);#指定字段名进行添加
+INSERT INTO 表名 VALUES(1,2,3),(a,b,c),(z,y,z);#一次添加多行数据
+
+删:
+DELETE FROM 表名 WHERE 指定字段名 = 指定字段名下的数据; #删除指定字段名下的数据对应的那一行数据 如果有多行数据对应 将会删除多行数据
+DELETE FROM 表名; #删除表里面的全部数据
+
+改:
+UPDATE 表名 SET 要改数据对应的字段名 = 改之后的数据 WHERE 指定字段名 = 指定字段名下的数据; #修改指定字段名下的数据对应的那一行数据 如果有多行数据对应 将会修改多行数据
+
+查:
+SELECT*FROM 表名;#列出整个表的数据
+SELECT 字段名 FROM 表名;#列出指定字段名下的所有数据
+SELECT DISTINCT 字段名 FROM 表名;#列出指定字段名下的所有不重复数据
+SELECT 字段名加上条件 FROM 表名; #列出一个对应字段的布尔值表 符合条件是1 不符合为0
+SELECT*FROM 表名 WHERE 指定字段名 = 指定字段名下的数据;#列出指定字段名下的数据对应的那一行数据 如果有多行数据对应 将会列出多行数据
+SELECT*FROM 表名 ORDER BY 字段名;         #按字段名从低到高列出全部数据
+SELECT*FROM 表名 ORDER BY 字段名 DESC;    #按字段名从高到低列出全部数据
+SELECT*FROM 表名 ORDER BY 字段名 LIMIT n; #按字段名从高到低列出前n行数据
 #多表联立查询
 #如果条件 表1.字段名1=表2.字段名2 将会输出这一对相等字段对应的数据
 SELECT*FROM 表1 JOIN 表2 ON 表1.字段名1=表2.字段名2; #输出相等字段对应的所有字段数据
@@ -331,4 +344,54 @@ SELECT `emp_id`,`branch_name`,`name`FROM `employee` JOIN `branch` ON `employee`.
 #16.查询研发部门的经理名字
 SELECT`name`FROM `employee` WHERE `emp_id` IN (SELECT `manager_id` FROM `branch` WHERE `branch_name` ='研发');
 )
+)
+
+                    (五)索引和视图           
+索引
+(
+#对表中的字段创建索引可以方便后续快速地查询该字段下的数据 数据量越大 效果更明显
+
+创建索引:
+CREATE TABLE 表名 (
+字段名a 数据类型a, 
+字段名b 数据类型b, 
+INDEX 索引名 (字段名)
+);#在创建表时直接定义索引
+CREATE INDEX 索引名 表名 (字段名);#创建完表之后再定义索引
+ALTER TABLE 表名 ADD INDEX 索引名 (字段名);#创建完表之后再定义索引
+
+删除索引:
+ALTER TABLE 表名 DROP INDEX 索引名;
+
+修改索引:
+ALTER TABLE 表名 RENAME INDEX 旧索引名 TO 新索引名;
+#索引的名字可以直接通过语句进行重命名 但如果想要修改索引的类型/属性 则需要先删除原索引再创建新索引
+
+查询索引:
+SHOW INDEX FROM 表名;
+)
+
+视图
+(
+#视图的存在是为了快速执行某种指定的查询语句 不具备存储数据的功能
+创建视图:
+CREATE VIEW 视图名 AS 查询语句
+
+删除视图:
+DROP VIEW 视图名;
+
+修改视图:
+CREATE VIEW 视图名 AS 新查询语句
+
+查询视图:
+#查看所有视图
+SELECT * FROM information_schema.views;
+#查看当前数据库中的所有视图
+SHOW TABLES WHERE TABLE_TYPE = 'VIEW';
+#查看特定数据库的视图
+SELECT * FROM information_schema.views 
+WHERE table_schema = '数据库名';
+
+使用视图:
+SELECT * FROM 视图名;
 )
